@@ -1,6 +1,15 @@
 #ifndef INCLUDE_CCAPI_CPP_SERVICE_CCAPI_SERVICE_H_
 #define INCLUDE_CCAPI_CPP_SERVICE_CCAPI_SERVICE_H_
 
+#if (defined(CCAPI_ENABLE_SERVICE_MARKET_DATA) &&                                                                                                   \
+     (defined(CCAPI_ENABLE_EXCHANGE_HUOBI) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP))) || \
+    (defined(CCAPI_ENABLE_SERVICE_EXECUTION_MANAGEMENT) &&                                                                                          \
+     (defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_BITMART)))
+#define CCAPI_REQUIRES_INFLATE_STREAM 1
+#else
+#define CCAPI_REQUIRES_INFLATE_STREAM 0
+#endif
+
 #ifndef CCAPI_HTTP_RESPONSE_PARSER_BODY_LIMIT
 #define CCAPI_HTTP_RESPONSE_PARSER_BODY_LIMIT (8 * 1024 * 1024)
 #endif
@@ -50,7 +59,9 @@
 #include "ccapi_cpp/ccapi_fix_connection.h"
 #include "ccapi_cpp/ccapi_http_connection.h"
 #include "ccapi_cpp/ccapi_http_retry.h"
+#if CCAPI_REQUIRES_INFLATE_STREAM
 #include "ccapi_cpp/ccapi_inflate_stream.h"
+#endif
 #include "ccapi_cpp/ccapi_queue.h"
 #include "ccapi_cpp/ccapi_request.h"
 #include "ccapi_cpp/ccapi_session_configs.h"
@@ -1437,10 +1448,7 @@ class Service : public std::enable_shared_from_this<Service> {
           } else if (stream.got_binary()) {
             CCAPI_LOGGER_DEBUG("received a binary message: " + UtilAlgorithm::stringToHex(std::string(data, dataSize)));
 
-#if defined(CCAPI_ENABLE_SERVICE_MARKET_DATA) &&                                                                                                      \
-        (defined(CCAPI_ENABLE_EXCHANGE_HUOBI) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP)) || \
-    defined(CCAPI_ENABLE_SERVICE_EXECUTION_MANAGEMENT) &&                                                                                             \
-        (defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_BITMART))
+#if CCAPI_REQUIRES_INFLATE_STREAM
 
             if (this->needDecompressWebsocketMessage) {
               std::string decompressed;
@@ -1660,13 +1668,8 @@ class Service : public std::enable_shared_from_this<Service> {
   // std::regex convertNumberToStringInJsonRegex{"(\\[|,|\":)\\s?(-?\\d+\\.?\\d*)"};
   // std::string convertNumberToStringInJsonRewrite{"$1\"$2\""};
   bool needDecompressWebsocketMessage{};
-#if defined(CCAPI_ENABLE_SERVICE_MARKET_DATA) &&                                                                                                      \
-        (defined(CCAPI_ENABLE_EXCHANGE_HUOBI) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP)) || \
-    defined(CCAPI_ENABLE_SERVICE_EXECUTION_MANAGEMENT) &&                                                                                             \
-        (defined(CCAPI_ENABLE_EXCHANGE_HUOBI_USDT_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_HUOBI_COIN_SWAP) || defined(CCAPI_ENABLE_EXCHANGE_BITMART))
-
+#if CCAPI_REQUIRES_INFLATE_STREAM
   InflateStream inflater;
-
 #endif
 
   std::array<char, CCAPI_JSON_PARSE_BUFFER_SIZE> jsonParseBuffer;

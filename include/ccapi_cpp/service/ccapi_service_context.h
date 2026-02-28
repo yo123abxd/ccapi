@@ -25,8 +25,9 @@ class ServiceContext {
     this->sslContextPtr = new SslContext(SslContext::tls_client);
     this->useInternalSslContextPtr = true;
     // this->sslContextPtr->set_options(SslContext::default_workarounds | SslContext::no_sslv2 | SslContext::no_sslv3 | SslContext::single_dh_use);
-    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_none);
-    // TODO(cryptochassis): verify ssl certificate to strengthen security
+    this->sslContextPtr->set_default_verify_paths();
+    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_peer);
+    // Done 2026-03-01 by tang: TODO(cryptochassis): verify ssl certificate to strengthen security
     // https://github.com/boostorg/asio/blob/develop/example/cpp03/ssl/client.cpp
   }
 #ifndef SWIG
@@ -35,7 +36,8 @@ class ServiceContext {
     this->executorWorkGuardPtr = new ExecutorWorkGuard(this->ioContextPtr->get_executor());
     this->sslContextPtr = new SslContext(SslContext::tls_client);
     this->useInternalSslContextPtr = true;
-    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_none);
+    this->sslContextPtr->set_default_verify_paths();
+    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_peer);
   }
 
   ServiceContext(SslContextPtr sslContextPtr) {
@@ -43,14 +45,16 @@ class ServiceContext {
     this->useInternalIoContextPtr = true;
     this->executorWorkGuardPtr = new ExecutorWorkGuard(this->ioContextPtr->get_executor());
     this->sslContextPtr = sslContextPtr;
-    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_none);
+    this->sslContextPtr->set_default_verify_paths();
+    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_peer);
   }
 
   ServiceContext(IoContextPtr ioContextPtr, SslContextPtr sslContextPtr) {
     this->ioContextPtr = ioContextPtr;
     this->executorWorkGuardPtr = new ExecutorWorkGuard(this->ioContextPtr->get_executor());
     this->sslContextPtr = sslContextPtr;
-    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_none);
+    this->sslContextPtr->set_default_verify_paths();
+    this->sslContextPtr->set_verify_mode(boost::asio::ssl::verify_peer);
   }
 #endif
   ServiceContext(const ServiceContext&) = delete;

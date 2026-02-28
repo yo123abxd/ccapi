@@ -41,8 +41,6 @@ class ExecutionManagementServiceBinanceDerivativesBase : public ExecutionManagem
           auto it = x.FindMember("positionAmt");
           if (it != x.MemberEnd()) {
             positionAmt = it->value.GetString();
-          } else {
-            positionAmt = x["maxQty"].GetString();
           }
           if (!positionAmt.empty()) {
             const auto& positionAmtDecimal = Decimal(positionAmt);
